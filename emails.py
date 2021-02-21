@@ -7,7 +7,7 @@ import datetime
 from dotenv import load_dotenv
 
 def getConfig():
-    project_folder = os.path.expanduser('~/Desktop/Workspace/pyutils')
+    project_folder = os.getcwd()
     load_dotenv(os.path.join(project_folder, '.env'))
     return {
         "email_user" : os.getenv("USERNAME"),
