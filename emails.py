@@ -1,9 +1,9 @@
-#!/usr/bin/env python3
+#!/opt/anaconda3/envs/pytuts/bin/python
 import os
 import base64
 import email
 import imaplib
-import datetime
+from datetime import datetime, date, timedelta
 from dotenv import load_dotenv
 
 def getConfig():
@@ -26,19 +26,28 @@ def connect():
     mail.login(email_user, email_pass)
     return mail
 
+def write_file(filename,data):
+    if os.path.isfile(filename):
+        with open(filename, 'a') as f:          
+            f.write('\n' + data)   
+    else:
+        with open(filename, 'w') as f:                   
+            f.write(data)
+
 def mark_as_read():
+    write_file('results.txt','====<<< Job Started : {0} >>>===='.format(datetime.now().strftime("%m/%d/%Y, %H:%M:%S")))
     mail = connect()
     readonly = False
     mail.select("INBOX", readonly)
     delta = int(os.getenv("DELTA"))
-    date = (datetime.date.today() - datetime.timedelta(delta)).strftime("%d-%b-%Y")
-    type, data = mail.search(None, ('UNSEEN'), '(BEFORE {0})'.format(date))
+    curr_date = (date.today() - timedelta(delta)).strftime("%d-%b-%Y")
+    type, data = mail.search(None, ('UNSEEN'), '(BEFORE {0})'.format(curr_date))
     mail_ids = data[0]
     id_list = mail_ids.split()
-    print(len(id_list))
+    write_file('results.txt','*** Processing {0} emails ***'.format(len(id_list)))
     for id in id_list:
-        print(id)
+        print('Marking email : {0} as read'.format(id))
         mail.store(id,'+FLAGS','\\SEEN')
-    print('*** Marked {0} emails as Read'.format(len(id_list)))
+    write_file('results.txt','====<<< Job Ended : {0} >>>===='.format(datetime.now().strftime("%m/%d/%Y, %H:%M:%S")))
 
 mark_as_read()
